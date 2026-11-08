@@ -3,48 +3,61 @@
 ## Overview
 
 ```text
-Phone browser                     Frame (Pi running a Mojo binary)
--------------                     --------------------------------
+Phone browser                     Frame (XIAO ESP32-C5)
+-------------                     ---------------------
 Pick and crop photo
 Convert to 16-grey frame
-Upload frame + thumbnail  --->    HTTP server
+Upload frame + thumbnail  --->    HTTP handlers (Mojo over ESP-IDF)
                                     |
                                     v
-                                  Photo store (files + order list)
+                                  Photo store (microSD)
                                     |
                                     v
-                                  Wake and session handling  <---  Button, timer
+                                  Wake and session logic  <---  Button, timer
                                     |
                                     v
-                                  IT8951 driver (spidev + GPIO)
+                                  IT8951 driver (Mojo, ESP-IDF SPI)
                                     |
                                     v
                                   Panel
 ```
 
+## Firmware layers
+
+| Layer | Written in | Provides |
+| --- | --- | --- |
+| Application | Mojo | Sessions, photo store, overlays, QR, HTTP handlers |
+| Panel driver | Mojo | IT8951 protocol |
+| Runtime shim | Mojo or C | Whatever Mojo needs from a runtime. See [Mojo on RISC-V](MOJO_RISCV.md) |
+| ESP-IDF | C, supplied by Espressif | WiFi, TCP/IP, HTTP server, SPI, SD, sleep, storage |
+
+There's no Python on the device, and no operating system beyond ESP-IDF's
+FreeRTOS.
+
 ## Power lifecycle
 
-The Pi is fully powered off unless it has work to do. The web server only exists
-during a session.
+The chip is in deep sleep unless it has work to do. The web server only exists
+during a session. The panel and SD card have no power during sleep.
 
 **Timer wake** (scheduled photo change):
 
-1. Power controller turns the Pi on.
-2. Program starts, draws the next photo at full quality.
-3. Pi powers off. WiFi is never started.
+1. The chip wakes and powers the panel and SD card.
+2. It streams the next photo to the panel at full quality.
+3. It cuts power to them and sleeps. WiFi is never started.
 
 **Button wake** (managing photos):
 
-1. Press. Nothing can change on the panel until something is running to drive
-   it, so this gap should be as short as possible.
-2. The program runs as the first thing Linux starts, with SPI and GPIO built into
-   the kernel, and draws a "Waking up" overlay from a bitmap before anything else.
+1. Press. The chip wakes immediately and powers the panel.
+2. It draws a "Waking up" overlay from a bitmap.
 3. WiFi connects, the server starts, and a token is generated.
-4. QR overlay replaces the loading overlay. It has to wait for this point anyway
+4. The QR overlay replaces the loading overlay. It has to wait for this point
    because it contains the address the frame was just given.
 5. The phone manages photos.
 6. Session ends on "Done" or after inactivity. The server stops, the photo is
-   restored at full quality, and the Pi powers off.
+   restored at full quality, and the chip sleeps.
+
+If WiFi doesn't connect within about a minute, the frame shows a failure message
+and sleeps. Presses during a wake are ignored.
 
 The overlays cover part of the photo instead of replacing it, so the frame still
 looks like a picture while waking.
@@ -62,24 +75,13 @@ frame.
 The cost is that changing the image processing later means re-uploading photos,
 unless originals are kept. The first version doesn't keep them.
 
-## Frame format
+## Frame format and memory
 
 Raw 4-bit grey, 1872×1404, packed two pixels per byte: 1,314,144 bytes.
 
-## Components
-
-| Component | Language | Depends on |
-| --- | --- | --- |
-| Phone page | HTML, JS, canvas | None |
-| HTTP server | Mojo | Standard library sockets |
-| Photo store | Mojo | Filesystem |
-| Wake and session handling | Mojo | Power controller |
-| Panel driver | Mojo | `spidev`, GPIO through FFI |
-| QR generator | Mojo | None, or a C library through FFI |
-| Overlay graphics | Mojo | None, using pre-rendered bitmaps |
-
-There's no Python on the device, and no C libraries beyond the system's own. The
-only on-screen text is in the overlays, so it can be pre-rendered.
+A frame fits in the 8 MB PSRAM, but it doesn't need to. Uploads stream from the
+network to microSD, and displays stream from microSD to the IT8951, which has its
+own frame memory.
 
 ## HTTP API sketch
 
@@ -88,7 +90,7 @@ Uploads are raw request bodies, which avoids multipart parsing.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| GET | `/` | Phone page |
+| GET | `/` | Phone page, served from flash |
 | GET | `/api/photos` | List photos and their order |
 | PUT | `/api/photos/{id}/frame` | Upload the raw panel frame |
 | PUT | `/api/photos/{id}/thumb` | Upload the thumbnail |
@@ -96,6 +98,7 @@ Uploads are raw request bodies, which avoids multipart parsing.
 | DELETE | `/api/photos/{id}` | Delete a photo |
 | PUT | `/api/order` | Set the rotation order |
 | POST | `/api/show/{id}` | Display a photo now |
+| POST | `/api/done` | End the session |
 
 ## Access
 
@@ -103,6 +106,7 @@ Uploads are raw request bodies, which avoids multipart parsing.
 - The QR only appears after a physical button press, and the server isn't
   running at any other time.
 - Tokens expire after a short period.
+- Text next to the QR tells people which WiFi network to join first.
 - Anyone on the network with a valid token can manage photos.
 
 ## Refresh modes
@@ -115,12 +119,13 @@ Uploads are raw request bodies, which avoids multipart parsing.
 
 ## Risks
 
-- **HTTP server:** planned as a small hand-written server on the standard
-  library's sockets, which haven't been tested for this yet.
-- **Boot time:** the wait before anything appears is set by Linux boot. A heavily
-  stripped Zero 2 W has reached userspace in under 3.5 seconds, without WiFi.
-  Stock Ubuntu will be much slower.
-- **Address space:** a minimal OS needs a kernel with 48-bit virtual addresses, or
-  a Mojo runtime rebuilt for fewer. See [Mojo on ARMv8.0](MOJO_ARM.md).
+- **Mojo without an operating system:** there's no official freestanding mode.
+  See [Mojo on RISC-V](MOJO_RISCV.md).
+- **Linking with ESP-IDF:** not attempted yet. The exact compiler flags need to
+  match Espressif's toolchain.
+- **SPI bus sharing:** the panel and microSD share a bus, and both are slow at
+  times. Only one transfer happens at a time, by design.
+- **IT8951 startup time:** unmeasured, and it sets how quickly the loading
+  overlay can appear.
 - **WiFi setup:** the hardest part of giving a frame to someone else. Deferred
-  to M6.
+  to M7.

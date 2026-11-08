@@ -1,25 +1,38 @@
 # Hardware
 
-Prices checked 2026-11-08, before tax, shipping, and tariffs.
+Prices checked 2026-11-08, before tax and shipping unless noted.
 
 ## Parts
 
 | Part | Choice | Price | Notes |
 | --- | --- | --- | --- |
 | Panel and driver | Waveshare 7.8" e-Paper HAT | $143.99 (1-9 units) | Includes the IT8951 driver board |
-| Compute | Raspberry Pi Zero 2 W with header | About $20-23 | Needs the [runtime build](MOJO_ARM.md); widely out of stock when checked |
-| Storage | microSD card | Not priced | |
-| Bench power | Micro-USB supply | Not priced | For development before the battery |
-| Power controller | Witty Pi 4 or similar | About $33 | Timer and button wake, 0.5 mA standby listed |
-| Battery | Flat LiPo, about 5,000 mAh | Not priced | Needs protection circuitry |
-| Boost stage | LiPo to 5 V | Not priced | The Witty Pi 4 takes 5 V or 6-30 V, not a single cell directly |
-| Charging | USB-C with a charge controller | Not priced | Plain 5 V is enough; needs CC resistors so USB-C to USB-C chargers work |
-| All-in-one option | PiSugar3 | $39.99 | USB-C, RTC, button, and battery on a Zero-sized board; the 1,200 mAh pack is too small |
+| Compute | Seeed XIAO ESP32-C5, pre-soldered for development | $6.90 at Seeed; $8.31 including US tariffs at RobotShop | Few units in stock at RobotShop when checked |
+| Storage | microSD card and SPI breakout | Not priced | Shares the SPI bus |
+| Battery | Flat 3.7 V LiPo with protection, 2,000-5,000 mAh | Not priced | Connects to the XIAO's battery pads |
+| Panel power | 5 V boost converter with an enable pin | Not priced | Must be fully off during sleep |
 | Button | Tactile switch and machined cap | A few dollars, more for custom caps | Alps or Omron class switch |
+| Prototyping | Jumper wires, breadboard | A few dollars | The HAT doesn't plug into the XIAO |
 | Frame | See below | Roughly $40-80 | Estimate |
 
-Alternative panel: Waveshare 10.3" HAT at about $200, with the same resolution
-over a larger area.
+Charging needs no extra parts, since the XIAO's USB-C port and charger handle it.
+
+## Compute: XIAO ESP32-C5
+
+| Property | Value |
+| --- | --- |
+| CPU | 32-bit RISC-V, up to 240 MHz |
+| Memory | 384 KB SRAM, 8 MB PSRAM |
+| Flash | 8 MB |
+| WiFi | Dual-band WiFi 6 |
+| Size | 21×17.8 mm |
+| Power and programming | USB-C |
+| Charging | Built in, for 3.7 V LiPo |
+| Deep sleep | 15 µA on battery, 375 µA on USB (listed) |
+| GPIO | 11 on headers, 5 on back pads |
+
+To check: which pins can wake the chip from deep sleep, since the button must use
+one of them.
 
 ## Panel: Waveshare 7.8"
 
@@ -32,8 +45,9 @@ over a larger area.
 | Dot pitch | 0.0845 mm, about 300 ppi |
 | Full refresh | 450 ms listed |
 | Partial refresh | About 0.3 s listed |
+| Refresh power | 1.2 W typical, listed |
 | Controller | IT8951 |
-| Interface used | SPI |
+| HAT supply | 5 V |
 
 Handling notes:
 
@@ -42,42 +56,45 @@ Handling notes:
 - Each panel has its own VCOM calibration voltage, which must be set to the
   printed value.
 
-Panels with Spectra 6 color were rejected: they can't show grey and take about
-25 seconds to refresh.
+## Wiring
 
-## Button wiring
+The HAT is designed for a Raspberry Pi header, so it's wired by hand. Set its
+switch to SPI mode.
 
-One momentary switch between a free GPIO pin and ground, using the internal
-pull-up. Confirm which pins the HAT uses before choosing one. The HAT covers the
-Pi's header, so solder to the underside of the pins or use a stacking header.
+| Signal | Connects to |
+| --- | --- |
+| SCK, MOSI, MISO | XIAO SPI pins, shared with microSD |
+| CS | XIAO GPIO |
+| HRDY (busy) | XIAO GPIO |
+| RST | XIAO GPIO |
+| 5 V | Boost converter output |
+| GND | Common ground |
 
-The button must also wake the power controller while the Pi is off. To check on
-the real board: how a tap behaves while the Pi is running, since the Witty Pi 4
-treats it as a graceful shutdown, and how the software tells a button wake from
-a timer wake.
+Other GPIOs: microSD CS, button, boost enable. That's 9 of the 11 header pins.
+
+The button goes between a wake-capable GPIO and ground.
 
 ## Power
 
-| State | Draw | Source |
-| --- | --- | --- |
-| Zero 2 W idle, WiFi on | About 600 mW | CNX Software measurement |
-| Zero 2 W during WiFi transfer | About 187 mA above idle, on average | CNX Software measurement |
-| Off, controller standby | About 0.5 mA | Witty Pi 4 listing |
-| Panel refresh | 1.2 W typical | Reseller listing |
+A 5,000 mAh LiPo holds about 18.5 Wh. Deep sleep at 15 µA and 3.7 V uses about
+1.3 mWh per day, so sleep is close to negligible as long as the panel, its boost,
+and the SD card are truly off.
 
-A 5,000 mAh LiPo holds about 18.5 Wh. Always-on Linux would drain it in about a
-day. With the Pi off between updates and a daily photo change, the estimate is
-roughly six months, mostly lost to standby and conversion. This is an estimate
-to be replaced by measurements in M4.
+Rough energy budget, to be replaced by M5 measurements:
 
-The IT8951 board's idle draw is unknown, so it has to lose power along with the
-Pi.
+| Event | Estimate |
+| --- | --- |
+| Daily photo change | A few mWh |
+| Five-minute phone session with WiFi on | Tens of mWh |
+
+That points to a battery life of a year or more, likely limited by the cell's
+self-discharge, which may allow a smaller and thinner battery.
 
 ## Frame and enclosure
 
 **Decision: yes, custom eventually, but not first.** Most of the custom work is
 the part you can't see: something has to hold the panel, boards, and button
-precisely. The wood should wait until the electronics stack has been measured.
+precisely. The wood should wait until the electronics have been measured.
 
 ### Stage 1: Retail frame
 
@@ -114,10 +131,11 @@ precisely. The wood should wait until the electronics stack has been measured.
 
 - The mat opening should be slightly smaller than the 158×119 mm active area so
   no panel edge shows. The render uses the exact size.
-- The Zero 2 W, HAT, power controller, and battery all have to fit behind the
-  panel. Measure the stack before committing to 40 mm.
+- The HAT is the tallest electronics part. Measure the stack before committing
+  to a depth, which may be well under 40 mm.
 - The panel is greyer than a white mat. Test warmer or darker mats.
-- The USB-C charging port goes on the back, reachable by taking the frame off
-  the wall.
+- USB-C charging port on the bottom edge, recessed, so the frame can charge
+  while hanging.
+- LiPo cells can swell. Give the battery its own pocket, clear of the panel.
 - No glass in front at first, since reflections hurt a low-contrast panel. Test
   it with museum glass if protection is needed.

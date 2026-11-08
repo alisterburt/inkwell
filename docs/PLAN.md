@@ -3,7 +3,8 @@
 ## Goal
 
 A cable-free frame that someone would believe was bought, not built, and that a
-non-technical person can update from their phone.
+non-technical person can update from their phone, with its firmware written in
+Mojo.
 
 ## Not in the first version
 
@@ -16,9 +17,10 @@ non-technical person can update from their phone.
 
 | Decision | Choice | Why |
 | --- | --- | --- |
-| Power | Battery, with the Pi fully off between updates | No visible cable, and the web server isn't always running |
-| Compute | Raspberry Pi Zero 2 W from the start, no Pi 5 | Develop on the hardware that ships, with Mojo on the device |
-| Button experience | Press, loading screen, then QR when the server is up | Slower to respond, accepted in exchange for battery power |
+| Compute | Seeed XIAO ESP32-C5 | RISC-V, which Mojo can target, with 8 MB PSRAM, built-in LiPo charging, and very low sleep current |
+| Language | Mojo on top of ESP-IDF | WiFi and drivers stay in Espressif's C code. C is the fallback for anything that resists |
+| Power | Battery with USB-C charging, deep sleep between updates | No visible cable, and the web server isn't always running |
+| Button experience | Press, loading overlay, then QR when the server is up | The QR needs the frame's network address anyway |
 | Panel | Waveshare 7.8", 1872×1404 | Matches the concept render and keeps the frame compact |
 
 ## Milestones
@@ -31,82 +33,80 @@ No hardware needed.
 
 - Browser code that crops a photo and converts it to a 1872×1404, 4-bit frame.
 - Mojo code that loads a frame, draws the loading and QR overlays, and writes a
-  PNG for preview.
+  PNG for preview. Keep it free of heap use where practical, so it moves to the
+  chip unchanged.
 - Exit: a real photo goes through the full pipeline, and the PNG preview matches
   the browser preview.
 
-### M1: Panel bring-up
+### M1: Mojo on the real chip
 
-Requires the [Mojo ARMv8.0 runtime build](MOJO_ARM.md).
+See [Mojo on RISC-V](MOJO_RISCV.md).
 
-- Buy the panel and a Zero 2 W. See [Hardware](HARDWARE.md).
-- Install Ubuntu Server 24.04.
-- Write the IT8951 driver in Mojo using `spidev` and GPIO.
-- Exit: a Mojo binary built off the device draws a test image on the panel in
-  16 greys, and the rebuilt Mojo runtime is confirmed on real hardware.
+- Buy the board. See [Hardware](HARDWARE.md).
+- Create an ESP-IDF project with a Mojo object linked in.
+- Call Mojo from C, and C from Mojo.
+- Decide how to handle the Mojo runtime.
+- Exit: a Mojo function runs on the XIAO and logs over USB, in a firmware built
+  from a repeatable script.
 
-### M2: Photo loop on the home network
+### M2: Panel bring-up
 
-- HTTP server in Mojo.
-- Phone page: pick, crop, preview, delete, reorder.
-- Phone converts each photo to a panel frame and uploads it.
+- Wire the IT8951 HAT to the XIAO, with the HAT set to SPI mode.
+- Write the IT8951 driver in Mojo, over ESP-IDF's SPI driver.
+- Exit: a frame streamed from storage appears on the panel in 16 greys.
+
+### M3: Photo loop on the home network
+
+- WiFi and HTTP through ESP-IDF, with request handlers in Mojo.
+- Phone page served from flash: pick, crop, preview, delete, reorder.
+- Uploads streamed straight to storage.
 - Exit: a photo goes from a phone to the panel over WiFi, and the phone preview
   matches the panel.
 
-### M3: Button, loading screen, and QR
+### M4: Button, deep sleep, and QR
 
-Developed on an always-powered Pi.
-
-- Momentary switch on GPIO, with debounce.
-- Loading overlay as soon as the program starts, before WiFi.
+- Deep sleep, with wake on button and on timer.
+- Timer wake: draw the next photo with no WiFi, then sleep.
+- Button wake: loading overlay, WiFi, server, QR overlay.
 - QR generator and expiring access token.
-- QR overlay once the server is reachable.
-- Session ends on "Done" or after inactivity, the photo is restored with a
-  full-quality refresh, and the server stops.
-- Exit: the full sequence works repeatedly, and an expired token is rejected.
+- Failure screen if WiFi doesn't connect.
+- Session ends on "Done" or after inactivity, the photo is restored at full
+  quality, and the chip sleeps.
+- Exit: the full sequence works repeatedly, an expired token is rejected, and
+  press-to-QR time is measured.
 
-### M4: Battery and power control
+### M5: Battery and power
 
-- Add a power controller, battery, and boost stage.
-- Timer wake: draw the next photo with no WiFi, then power off.
-- Button wake: run the session from M3, then power off.
-- Power off the IT8951 board along with the Pi.
-- Draw the loading overlay as the first thing Linux runs, and reduce boot time,
-  moving to a minimal OS if needed.
+- Battery, with a 5 V boost for the panel that's fully off during sleep.
+- Power off the SD card during sleep.
 - Low-battery warning on the phone page.
-- Exit: measured press-to-QR time, with a target under 15 seconds. Measured
-  energy per photo change and per session, and a battery-life estimate based on
-  those numbers.
+- Exit: measured sleep current and energy per photo change and per session, and
+  a battery-life estimate based on those numbers.
 
-### M5: Enclosure
+### M6: Enclosure
 
 See the staged approach in [Hardware](HARDWARE.md#frame-and-enclosure).
 
 - Exit: a finished frame hangs on a wall with no cable and no visible
-  electronics, and can be recharged without tools.
+  electronics, and recharges without tools.
 
-### M6: Setup for other people
+### M7: Setup for other people
 
 Only needed if a frame will be given to someone else.
 
 - Hotspot setup mode for entering WiFi details from a phone.
 - Exit: someone can set up a frame without a computer.
 
-### Prerequisite for M1: Mojo on ARMv8.0
-
-Build the runtime libraries for the Zero 2 W. See [Mojo on ARMv8.0](MOJO_ARM.md).
-M0 doesn't depend on it.
-
 ## Open decisions
 
 | # | Decision | Options | Leaning | Blocks |
 | --- | --- | --- | --- | --- |
-| 1 | Access | Home network only, or remote too | Home only for the first version | M2 |
-| 2 | Photo dithering | None, or fine dither | Fine dither for photos, none for text | M2 |
-| 3 | Power controller | PiSugar family, Witty Pi 4 with separate charger and boost, or a custom board | Test a PiSugar first for simplicity; check standby draw and pack size | M4 |
-| 4 | Operating system | Ubuntu Server, or a minimal Buildroot image | Start on Ubuntu, move if boot time requires it | M4 |
-| 5 | Press feedback | Early-boot overlay only, or a small microcontroller that draws it before Linux | Early-boot first; add the microcontroller if the measured gap feels dead | M4 |
-| 6 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M5 |
+| 1 | Mojo runtime | Stub it, avoid the heap, or add a proper freestanding mode | Avoid the heap and stub the rest first; pursue freestanding upstream | M1 |
+| 2 | Photo storage | microSD, or the 8 MB flash | microSD, because flash only holds a few frames | M2 |
+| 3 | Access | Home network only, or remote too | Home only for the first version | M3 |
+| 4 | Photo dithering | None, or fine dither | Fine dither for photos, none for text | M3 |
+| 5 | Battery size | About 2,000 to 5,000 mAh | Decide from M5 measurements and available depth | M5 |
+| 6 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M6 |
 
 ## Later
 
@@ -115,6 +115,5 @@ rendering, HTTPS, and JSON. Notes for when it comes back:
 
 - Prefer Google Calendar with `singleEvents=true` and a `timeZone` parameter, so
   Google expands recurring events and returns local times.
-- On battery, update a few times a day. Polling every few minutes would drain it
-  within weeks to a few months.
-- Text would use FreeType through FFI, and HTTPS would use `libcurl`.
+- Battery cost is mostly WiFi and TLS on each fetch, so update a few times a
+  day.

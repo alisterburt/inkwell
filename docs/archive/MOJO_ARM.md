@@ -1,10 +1,12 @@
 # Mojo on ARMv8.0
 
+*Archived. inkwell moved from a Raspberry Pi Zero 2 W to an ESP32-C5, so it no
+longer depends on this. Kept because the findings may help others.*
+
 Mojo 1.2.0 programs don't start on the Raspberry Pi Zero 2 W, Pi 3, or Pi 4.
 This records what's known and the proposed fix in `modular/modular`.
 
-inkwell runs on a Zero 2 W, so it needs these libraries from the start. It only
-needs its own build:
+A project on a Zero 2 W would only need its own build:
 
 1. Check out `mojo/v1.2.0`, or the tag matching the compiler in use.
 2. Set the aarch64 C++ flag to `-mcpu=cortex-a53`.
@@ -13,7 +15,7 @@ needs its own build:
 4. Ship the three `.so` files next to the program.
 
 This hasn't been built yet. The rest of this document covers landing the fix
-upstream, which inkwell doesn't depend on.
+upstream.
 
 ## Test results
 

@@ -10,35 +10,37 @@ placeholder, processed through a simulation of the panel.*
 ## How it works
 
 1. Press the button on the top edge of the frame.
-2. The frame wakes up and shows a loading screen.
+2. The frame wakes up and shows a loading overlay.
 3. When its web server is up, it shows a QR code.
 4. Scan it to open a page served by the frame.
 5. Add, crop, reorder, or delete photos on your phone.
 6. Tap **Send to frame**.
-7. The frame shuts its web server down and powers itself off.
+7. The frame shuts its web server down and goes back to deep sleep.
 
 ## Principles
 
 - **Looks like a print.** No status lights or visible electronics on the front.
-- **Battery powered, off by default.** No power cable. The frame is fully off
-  between updates, and the web server only runs while someone is managing
-  photos. A press can take several seconds to show anything, which is an
-  accepted tradeoff.
+- **No power cable.** Battery powered and rechargeable over USB-C. The frame
+  sleeps between updates, and the web server only runs while someone is
+  managing photos.
 - **Local first.** Photos stay on the frame, with no cloud service or accounts
   in the first version.
-- **Mojo on the device, no Python.** The phone page is HTML and JavaScript.
-  Everything on the frame is Mojo, talking to the kernel's SPI and GPIO
-  interfaces through FFI.
+- **Mojo on a microcontroller, no Python.** Firmware logic is Mojo running on a
+  small RISC-V chip, on top of Espressif's ESP-IDF for WiFi and drivers. The
+  phone page is HTML and JavaScript.
 
 ## Status
 
-Planning. No hardware has been bought and no firmware has been written.
+Planning, with one early result: Mojo code compiled for RV32IMAC ran correctly
+under emulation with no runtime symbols. See
+[`spikes/riscv-frame`](spikes/riscv-frame). No hardware has been bought yet.
 
 ## Docs
 
 | Document | Contents |
 | --- | --- |
 | [Plan](docs/PLAN.md) | Milestones, exit criteria, open decisions |
-| [Hardware](docs/HARDWARE.md) | Parts, prices, frame and enclosure design |
-| [Architecture](docs/ARCHITECTURE.md) | Software components and data flow |
-| [Mojo on ARMv8.0](docs/MOJO_ARM.md) | Why Mojo doesn't run on a Pi Zero 2 W, and the fix |
+| [Hardware](docs/HARDWARE.md) | Parts, prices, power, frame and enclosure design |
+| [Architecture](docs/ARCHITECTURE.md) | Firmware components and data flow |
+| [Mojo on RISC-V](docs/MOJO_RISCV.md) | Status and plan for running Mojo on the ESP32-C5 |
+| [Archive](docs/archive/MOJO_ARM.md) | Findings from the earlier Raspberry Pi approach |
