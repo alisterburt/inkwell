@@ -13,7 +13,8 @@ Prices checked 2026-11-08, before tax, shipping, and tariffs.
 | Power controller | Witty Pi 4 or similar | About $33 | Timer and button wake, 0.5 mA standby listed |
 | Battery | Flat LiPo, about 5,000 mAh | Not priced | Needs protection circuitry |
 | Boost stage | LiPo to 5 V | Not priced | The Witty Pi 4 takes 5 V or 6-30 V, not a single cell directly |
-| Charging | USB-C on the back, with a charge controller | Not priced | |
+| Charging | USB-C with a charge controller | Not priced | Plain 5 V is enough; needs CC resistors so USB-C to USB-C chargers work |
+| All-in-one option | PiSugar3 | $39.99 | USB-C, RTC, button, and battery on a Zero-sized board; the 1,200 mAh pack is too small |
 | Button | Tactile switch and machined cap | A few dollars, more for custom caps | Alps or Omron class switch |
 | Frame | See below | Roughly $40-80 | Estimate |
 

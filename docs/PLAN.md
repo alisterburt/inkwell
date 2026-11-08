@@ -102,7 +102,7 @@ Pi 5, but M4 depends on it.
 | 1 | Panel size | 7.8" or 10.3", both 1872×1404 | 7.8" for the prototype | M1 |
 | 2 | Access | Home network only, or remote too | Home only for the first version | M2 |
 | 3 | Photo dithering | None, or fine dither | Fine dither for photos, none for text | M2 |
-| 4 | Power controller | Witty Pi 4, or a smaller custom board | Witty Pi 4 to prototype | M4 |
+| 4 | Power controller | PiSugar family, Witty Pi 4 with separate charger and boost, or a custom board | Test a PiSugar first for simplicity; check standby draw and pack size | M4 |
 | 5 | Operating system | Ubuntu Server, or a minimal Buildroot image | Start on Ubuntu, move if boot time requires it | M4 |
 | 6 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M5 |
 
