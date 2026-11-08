@@ -76,6 +76,17 @@ Other GPIOs: microSD CS, button, boost enable. That's 9 of the 11 header pins.
 
 The button goes between a wake-capable GPIO and ground.
 
+Compatibility notes:
+
+- Waveshare only documents Raspberry Pi and STM32 hosts for this HAT, so the
+  XIAO ESP32-C5 combination is unproven. Test it early, in M2.
+- Other projects report 3.3 V data lines with a 5 V supply on this HAT family.
+- The 5 V supply has to be exact and strong. A USB 5 V rail through a diode is
+  reported not to work, so use a proper regulated supply.
+- Waveshare lists about 0.1 W standby, so the HAT must lose power during sleep.
+- Connect all cables before powering on, since the HAT can't be hot-plugged.
+- MISO is required, because the driver reads registers from the IT8951.
+
 ## Power
 
 A 5,000 mAh LiPo holds about 18.5 Wh. Deep sleep at 15 µA and 3.7 V uses about
