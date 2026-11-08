@@ -10,6 +10,7 @@ non-technical person can update from their phone.
 - Remote access or a cloud service
 - User accounts
 - Color
+- Calendar mode. See [Later](#later).
 
 ## Decided
 
@@ -23,14 +24,15 @@ non-technical person can update from their phone.
 
 Each milestone ends with something that can be checked.
 
-### M0: Renderer on a dev machine
+### M0: Frame pipeline on a dev machine
 
 No hardware needed.
 
-- Draw shapes and text in Mojo into a 1872×1404, 4-bit buffer.
-- Write the buffer to a PNG for preview.
-- Exit: the calendar layout and a photo render correctly to PNG, using FreeType
-  over FFI for text.
+- Browser code that crops a photo and converts it to a 1872×1404, 4-bit frame.
+- Mojo code that loads a frame, draws the loading and QR overlays, and writes a
+  PNG for preview.
+- Exit: a real photo goes through the full pipeline, and the PNG preview matches
+  the browser preview.
 
 ### M1: Panel bring-up
 
@@ -81,13 +83,7 @@ See the staged approach in [Hardware](HARDWARE.md#frame-and-enclosure).
 - Exit: a finished frame hangs on a wall with no cable and no visible
   electronics, and can be recharged without tools.
 
-### M6: Calendar mode
-
-- Fetch events using `libcurl` over FFI and a JSON parser.
-- Reuse the week layout from M0, including side-by-side overlapping events.
-- Exit: the week view updates on a schedule of a few times a day.
-
-### M7: Setup for other people
+### M6: Setup for other people
 
 Only needed if a frame will be given to someone else.
 
@@ -109,4 +105,14 @@ Pi 5, but M4 depends on it.
 | 4 | Power controller | Witty Pi 4, or a smaller custom board | Witty Pi 4 to prototype | M4 |
 | 5 | Operating system | Ubuntu Server, or a minimal Buildroot image | Start on Ubuntu, move if boot time requires it | M4 |
 | 6 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M5 |
-| 7 | Calendar source | Google, or iCloud/iCal | Google, because its API expands recurring events | M6 |
+
+## Later
+
+**Calendar mode.** A one-week view on the same hardware. It would add text
+rendering, HTTPS, and JSON. Notes for when it comes back:
+
+- Prefer Google Calendar with `singleEvents=true` and a `timeZone` parameter, so
+  Google expands recurring events and returns local times.
+- On battery, update a few times a day. Polling every few minutes would drain it
+  within weeks to a few months.
+- Text would use FreeType through FFI, and HTTPS would use `libcurl`.

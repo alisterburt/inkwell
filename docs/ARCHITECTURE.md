@@ -76,10 +76,10 @@ Raw 4-bit grey, 1872×1404, packed two pixels per byte: 1,314,144 bytes.
 | Wake and session handling | Mojo | Power controller |
 | Panel driver | Mojo | `spidev`, GPIO through FFI |
 | QR generator | Mojo | None, or a C library through FFI |
-| Text rendering | Mojo | FreeType through FFI |
-| Calendar fetch | Mojo | `libcurl` through FFI, JSON parser |
+| Overlay graphics | Mojo | None, using pre-rendered bitmaps |
 
-There's no Python on the device.
+There's no Python on the device, and no C libraries beyond the system's own. The
+only on-screen text is in the overlays, so it can be pre-rendered.
 
 ## HTTP API sketch
 
@@ -109,28 +109,18 @@ Uploads are raw request bodies, which avoids multipart parsing.
 
 | Use | Mode |
 | --- | --- |
-| Photos and calendar | GC16, full 16 greys |
+| Photos | GC16, full 16 greys |
 | Loading and QR overlays | Fast black-and-white partial update |
 | End of session | GC16, to clear ghosting |
 
-## Calendar source
-
-On battery, wake a few times a day to fetch events, and redraw only when they've
-changed or the day has rolled over. Polling every few minutes would drain the
-battery within weeks to a few months. Webhooks aren't an option because the frame
-is off.
-
-Use `singleEvents=true` and a `timeZone` parameter so Google expands recurring
-events and returns local times.
-
 ## Risks
 
-- **Mojo ecosystem:** community HTTP and JSON libraries haven't been checked on
-  Mojo 1.2. Small hand-written versions are the fallback.
+- **HTTP server:** planned as a small hand-written server on the standard
+  library's sockets, which haven't been tested for this yet.
 - **Boot time:** the wait before anything appears is set by Linux boot. A heavily
   stripped Zero 2 W has reached userspace in under 3.5 seconds, without WiFi.
   Stock Ubuntu will be much slower.
 - **Address space:** a minimal OS needs a kernel with 48-bit virtual addresses, or
   a Mojo runtime rebuilt for fewer. See [Mojo on ARMv8.0](MOJO_ARM.md).
 - **WiFi setup:** the hardest part of giving a frame to someone else. Deferred
-  to M7.
+  to M6.

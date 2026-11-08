@@ -18,8 +18,6 @@ placeholder, processed through a simulation of the panel.*
 6. Tap **Send to frame**.
 7. The frame shuts its web server down and powers itself off.
 
-The same hardware can also show a one-week calendar.
-
 ## Principles
 
 - **Looks like a print.** No status lights or visible electronics on the front.
@@ -30,7 +28,8 @@ The same hardware can also show a one-week calendar.
 - **Local first.** Photos stay on the frame, with no cloud service or accounts
   in the first version.
 - **Mojo on the device, no Python.** The phone page is HTML and JavaScript.
-  Everything on the frame is Mojo plus a few C libraries through FFI.
+  Everything on the frame is Mojo, talking to the kernel's SPI and GPIO
+  interfaces through FFI.
 
 ## Status
 
