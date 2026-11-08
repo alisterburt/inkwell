@@ -106,9 +106,10 @@ Development builds have WiFi details flashed in, so this comes last.
 | 1 | Mojo runtime | Stub it, avoid the heap, or add a proper freestanding mode | Avoid the heap and stub the rest first; pursue freestanding upstream | M1 |
 | 2 | Photo storage | microSD, or the 8 MB flash | microSD, because flash only holds a few frames | M2 |
 | 3 | Access | Home network only, or remote too | Home only for the first version | M3 |
-| 4 | Photo dithering | None, or fine dither | Fine dither for photos, none for text | M3 |
-| 5 | Battery size | About 2,000 to 5,000 mAh | Decide from M5 measurements and available depth | M5 |
-| 6 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M6 |
+| 4 | Portrait photos | Crop to landscape, add paper-colored bars, or hang the frame either way | Hang either way as a setting, with bars for mismatched photos | M3 |
+| 5 | Photo dithering | None, or fine dither | Fine dither for photos, none for text | M3 |
+| 6 | Battery size | About 2,000 to 5,000 mAh | Decide from M5 measurements and available depth | M5 |
+| 7 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M6 |
 
 ## Later
 

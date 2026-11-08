@@ -91,7 +91,24 @@ frame.
 - Photo orientation and large camera files are handled before upload.
 
 The cost is that changing the image processing later means re-uploading photos,
-unless originals are kept. The first version doesn't keep them.
+unless originals are kept. The first version doesn't keep them, so re-cropping
+means picking the photo from the camera roll again.
+
+## Phone page
+
+The frame serves one self-contained, gzipped page from flash, with nothing loaded
+from the internet. It runs in the phone's browser.
+
+- A public HTTPS site can't call a plain local address, and an app would need
+  installing, so the frame hosts the page itself.
+- Plain HTTP rules out service workers, the screen wake lock, Web Share, and
+  `crypto.subtle`. The photo picker, canvas, `fetch`, and WebAssembly all work.
+- Photos are processed and uploaded one at a time with progress shown. Each
+  upload resets the session timer.
+- The page asks people to keep it open, since a phone can pause it when locked.
+- Previews use the panel's real tones, with an auto-contrast option.
+- Thumbnails come from the frame as one bundle, because ESP-IDF's HTTP server
+  handles few connections at once.
 
 ## Frame format and memory
 
@@ -112,7 +129,7 @@ Uploads are raw request bodies, which avoids multipart parsing.
 | GET | `/api/photos` | List photos and their order |
 | PUT | `/api/photos/{id}/frame` | Upload the raw panel frame |
 | PUT | `/api/photos/{id}/thumb` | Upload the thumbnail |
-| GET | `/api/photos/{id}/thumb` | Get the thumbnail |
+| GET | `/api/thumbs` | Get all thumbnails as one bundle |
 | DELETE | `/api/photos/{id}` | Delete a photo |
 | PUT | `/api/order` | Set the rotation order |
 | POST | `/api/show/{id}` | Display a photo now |
