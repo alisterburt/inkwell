@@ -26,7 +26,7 @@ Upload frame + thumbnail  --->    HTTP handlers (Mojo over ESP-IDF)
 
 | Layer | Written in | Provides |
 | --- | --- | --- |
-| Application | Mojo | Sessions, photo store, overlays, QR, HTTP handlers |
+| Application | Mojo | Sessions, photo store, screens, QR, HTTP handlers |
 | Panel driver | Mojo | IT8951 protocol |
 | Runtime shim | Mojo or C | Whatever Mojo needs from a runtime. See [Mojo on RISC-V](MOJO_RISCV.md) |
 | ESP-IDF | C, supplied by Espressif | WiFi, TCP/IP, HTTP server, SPI, SD, sleep, storage |
@@ -48,19 +48,16 @@ during a session. The panel and SD card have no power during sleep.
 **Button wake** (managing photos):
 
 1. Press. The chip wakes immediately and powers the panel.
-2. It draws a "Waking up" overlay from a bitmap.
+2. It draws a full "Waking up" screen from a bitmap.
 3. WiFi connects, the server starts, and a token is generated.
-4. The QR overlay replaces the loading overlay. It has to wait for this point
-   because it contains the address the frame was just given.
+4. A QR screen replaces the loading screen. It has to wait for this point because
+   it contains the address the frame was just given.
 5. The phone manages photos.
 6. Session ends on "Done" or after inactivity. The server stops, the photo is
    restored at full quality, and the chip sleeps.
 
 If WiFi doesn't connect within about a minute, the frame shows a failure message
 and sleeps. Presses during a wake are ignored.
-
-The overlays cover part of the photo instead of replacing it, so the frame still
-looks like a picture while waking.
 
 ## First-time WiFi setup
 
@@ -135,8 +132,13 @@ Uploads are raw request bodies, which avoids multipart parsing.
 | Use | Mode |
 | --- | --- |
 | Photos | GC16, full 16 greys |
-| Loading and QR overlays | Fast black-and-white partial update |
+| Photo to loading screen | GC16, with a visible flash |
+| Loading to QR to connected | A2 black-and-white, no flash |
 | End of session | GC16, to clear ghosting |
+
+GC16 flickers black and white for about half a second, which clears ghosting.
+Waveshare advises a full refresh after several partial ones, and redrawing at
+least every 24 hours, so timer wakes should change the photo at least daily.
 
 ## Risks
 

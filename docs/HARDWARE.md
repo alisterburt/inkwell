@@ -55,6 +55,8 @@ Handling notes:
   ribbon with tape during development.
 - Each panel has its own VCOM calibration voltage, which must be set to the
   printed value.
+- Waveshare rates the panel for about 1,000,000 refreshes, recommends redrawing
+  at least every 24 hours, and says not to update it in direct sunlight.
 
 ## Wiring
 

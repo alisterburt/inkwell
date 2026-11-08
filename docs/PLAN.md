@@ -20,7 +20,7 @@ Mojo.
 | Compute | Seeed XIAO ESP32-C5 | RISC-V, which Mojo can target, with 8 MB PSRAM, built-in LiPo charging, and very low sleep current |
 | Language | Mojo on top of ESP-IDF | WiFi and drivers stay in Espressif's C code. C is the fallback for anything that resists |
 | Power | Battery with USB-C charging, deep sleep between updates | No visible cable, and the web server isn't always running |
-| Button experience | Press, loading overlay, then QR when the server is up | The QR needs the frame's network address anyway |
+| Button experience | Press, full loading screen, then QR screen when the server is up | The QR needs the frame's network address anyway |
 | Panel | Waveshare 7.8", 1872×1404 | Matches the concept render and keeps the frame compact |
 
 ## Milestones
@@ -32,7 +32,7 @@ Each milestone ends with something that can be checked.
 No hardware needed.
 
 - Browser code that crops a photo and converts it to a 1872×1404, 4-bit frame.
-- Mojo code that loads a frame, draws the loading and QR overlays, and writes a
+- Mojo code that loads a frame, draws the loading and QR screens, and writes a
   PNG for preview. Keep it free of heap use where practical, so it moves to the
   chip unchanged.
 - Exit: a real photo goes through the full pipeline, and the PNG preview matches
@@ -66,8 +66,8 @@ See [Mojo on RISC-V](MOJO_RISCV.md).
 ### M4: Button, deep sleep, and QR
 
 - Deep sleep, with wake on button and on timer.
-- Timer wake: draw the next photo with no WiFi, then sleep.
-- Button wake: loading overlay, WiFi, server, QR overlay.
+- Timer wake: draw the next photo at least once a day with no WiFi, then sleep.
+- Button wake: loading screen, WiFi, server, QR screen.
 - QR generator and expiring access token.
 - Failure screen if WiFi doesn't connect.
 - Session ends on "Done" or after inactivity, the photo is restored at full

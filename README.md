@@ -10,7 +10,7 @@ placeholder, processed through a simulation of the panel.*
 ## How it works
 
 1. Press the button on the top edge of the frame.
-2. The frame wakes up and shows a loading overlay.
+2. The frame wakes up and shows a loading screen.
 3. When its web server is up, it shows a QR code.
 4. Scan it to open a page served by the frame.
 5. Add, crop, reorder, or delete photos on your phone.
