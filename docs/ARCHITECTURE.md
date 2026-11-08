@@ -62,6 +62,27 @@ and sleeps. Presses during a wake are ignored.
 The overlays cover part of the photo instead of replacing it, so the frame still
 looks like a picture while waking.
 
+## First-time WiFi setup
+
+The frame learns the home network from a phone, with no app.
+
+1. With no saved network, a button press starts a temporary hotspot and shows a
+   QR code that joins it. The password is random and only shown on the frame.
+2. The phone joins, and a setup page served by the frame opens through a captive
+   portal. A second QR opens it if the portal doesn't appear.
+3. The person picks a network and enters its password.
+4. The frame tests the connection with the hotspot still up, so the page can
+   report a wrong password right away.
+5. Details are saved in flash, the hotspot closes, and normal use begins.
+
+Holding the button for about 10 seconds forgets the network. Setup mode times out
+after a few minutes. Bluetooth provisioning was rejected because iPhone browsers
+can't use it, which would require an app. Networks with their own login page
+won't work.
+
+During development, WiFi details are flashed with the firmware, so this can wait
+until M7.
+
 ## Key decision: the phone does the image processing
 
 The browser crops, resizes, converts to grey, dithers, and uploads the finished

@@ -92,10 +92,12 @@ See the staged approach in [Hardware](HARDWARE.md#frame-and-enclosure).
 
 ### M7: Setup for other people
 
-Only needed if a frame will be given to someone else.
+Development builds have WiFi details flashed in, so this comes last.
 
-- Hotspot setup mode for entering WiFi details from a phone.
-- Exit: someone can set up a frame without a computer.
+- Hotspot setup mode for entering WiFi details from a phone. See
+  [Architecture](ARCHITECTURE.md#first-time-wifi-setup).
+- Long press to forget the network.
+- Exit: someone can set up a frame from a phone, with no computer or app.
 
 ## Open decisions
 
