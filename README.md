@@ -1,7 +1,6 @@
-# eink-frame
+# inkwell
 
-A wall-mounted e-ink picture frame you manage from your phone. It's a working
-name.
+A wall-mounted e-ink picture frame you manage from your phone.
 
 ![Concept render of the frame](docs/images/frame_hero.png)
 
