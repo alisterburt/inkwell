@@ -13,7 +13,7 @@ Upload frame + thumbnail  --->    HTTP server
                                   Photo store (files + order list)
                                     |
                                     v
-                                  Scheduler  <---  Button (GPIO)
+                                  Wake and session handling  <---  Button, timer
                                     |
                                     v
                                   IT8951 driver (spidev + GPIO)
@@ -21,6 +21,33 @@ Upload frame + thumbnail  --->    HTTP server
                                     v
                                   Panel
 ```
+
+## Power lifecycle
+
+The Pi is fully powered off unless it has work to do. The web server only exists
+during a session.
+
+**Timer wake** (scheduled photo change):
+
+1. Power controller turns the Pi on.
+2. Program starts, draws the next photo at full quality.
+3. Pi powers off. WiFi is never started.
+
+**Button wake** (managing photos):
+
+1. Press. There's no visible response until Linux has booted far enough to start
+   the program.
+2. Program starts as early as possible and draws a "Waking up" overlay, before
+   WiFi.
+3. WiFi connects, the server starts, and a token is generated.
+4. QR overlay replaces the loading overlay. It has to wait for this point anyway
+   because it contains the address the frame was just given.
+5. The phone manages photos.
+6. Session ends on "Done" or after inactivity. The server stops, the photo is
+   restored at full quality, and the Pi powers off.
+
+The overlays cover part of the photo instead of replacing it, so the frame still
+looks like a picture while waking.
 
 ## Key decision: the phone does the image processing
 
@@ -46,7 +73,7 @@ Raw 4-bit grey, 1872×1404, packed two pixels per byte: 1,314,144 bytes.
 | Phone page | HTML, JS, canvas | None |
 | HTTP server | Mojo | Standard library sockets |
 | Photo store | Mojo | Filesystem |
-| Scheduler | Mojo | Timers |
+| Wake and session handling | Mojo | Power controller |
 | Panel driver | Mojo | `spidev`, GPIO through FFI |
 | QR generator | Mojo | None, or a C library through FFI |
 | Text rendering | Mojo | FreeType through FFI |
@@ -73,7 +100,8 @@ Uploads are raw request bodies, which avoids multipart parsing.
 ## Access
 
 - The QR contains the frame's current address and a random token.
-- The QR only appears after a physical button press.
+- The QR only appears after a physical button press, and the server isn't
+  running at any other time.
 - Tokens expire after a short period.
 - Anyone on the network with a valid token can manage photos.
 
@@ -82,14 +110,15 @@ Uploads are raw request bodies, which avoids multipart parsing.
 | Use | Mode |
 | --- | --- |
 | Photos and calendar | GC16, full 16 greys |
-| QR overlay | Fast black-and-white partial update |
-| After the QR times out | GC16 on that area, to clear ghosting |
+| Loading and QR overlays | Fast black-and-white partial update |
+| End of session | GC16, to clear ghosting |
 
 ## Calendar source
 
-Poll Google Calendar every few minutes with a sync token, and redraw only when
-events change, plus once at midnight. Webhooks would need a public HTTPS
-endpoint and renewals, for little benefit on a wall display.
+On battery, wake a few times a day to fetch events, and redraw only when they've
+changed or the day has rolled over. Polling every few minutes would drain the
+battery within weeks to a few months. Webhooks aren't an option because the frame
+is off.
 
 Use `singleEvents=true` and a `timeZone` parameter so Google expands recurring
 events and returns local times.
@@ -98,5 +127,10 @@ events and returns local times.
 
 - **Mojo ecosystem:** community HTTP and JSON libraries haven't been checked on
   Mojo 1.2. Small hand-written versions are the fallback.
+- **Boot time:** the wait before anything appears is set by Linux boot. A heavily
+  stripped Zero 2 W has reached userspace in under 3.5 seconds, without WiFi.
+  Stock Ubuntu will be much slower.
+- **Address space:** a minimal OS needs a kernel with 48-bit virtual addresses, or
+  a Mojo runtime rebuilt for fewer. See [Mojo on ARMv8.0](MOJO_ARM.md).
 - **WiFi setup:** the hardest part of giving a frame to someone else. Deferred
-  to M6.
+  to M7.

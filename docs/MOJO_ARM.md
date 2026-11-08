@@ -3,6 +3,9 @@
 Mojo 1.2.0 programs don't start on the Raspberry Pi Zero 2 W, Pi 3, or Pi 4.
 This records what's known and the proposed fix in `modular/modular`.
 
+The battery-powered frame uses a Zero 2 W, so this fix is required for the
+product.
+
 ## Test results
 
 A small program was cross-compiled with `--target-cpu cortex-a53`, linked against

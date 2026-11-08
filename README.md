@@ -11,18 +11,22 @@ placeholder, processed through a simulation of the panel.*
 ## How it works
 
 1. Press the button on the top edge of the frame.
-2. The frame draws a QR code on its own screen.
-3. Scan it to open a page served by the frame.
-4. Add, crop, reorder, or delete photos on your phone.
-5. Tap **Send to frame**.
+2. The frame wakes up and shows a loading screen.
+3. When its web server is up, it shows a QR code.
+4. Scan it to open a page served by the frame.
+5. Add, crop, reorder, or delete photos on your phone.
+6. Tap **Send to frame**.
+7. The frame shuts its web server down and powers itself off.
 
 The same hardware can also show a one-week calendar.
 
 ## Principles
 
 - **Looks like a print.** No status lights or visible electronics on the front.
-- **Responds immediately.** A button press gets a visible response in under a
-  second.
+- **Battery powered, off by default.** No power cable. The frame is fully off
+  between updates, and the web server only runs while someone is managing
+  photos. A press can take several seconds to show anything, which is an
+  accepted tradeoff.
 - **Local first.** Photos stay on the frame, with no cloud service or accounts
   in the first version.
 - **Mojo on the device, no Python.** The phone page is HTML and JavaScript.
