@@ -3,8 +3,17 @@
 Mojo 1.2.0 programs don't start on the Raspberry Pi Zero 2 W, Pi 3, or Pi 4.
 This records what's known and the proposed fix in `modular/modular`.
 
-The battery-powered frame uses a Zero 2 W, so this fix is required for the
-product.
+inkwell runs on a Zero 2 W, so it needs these libraries from the start. It only
+needs its own build:
+
+1. Check out `mojo/v1.2.0`, or the tag matching the compiler in use.
+2. Set the aarch64 C++ flag to `-mcpu=cortex-a53`.
+3. On arm64 Linux, build `//Mojo:CompilerRT`, `//AsyncRT:RuntimeGlobals`, and
+   `//Support:Globals`.
+4. Ship the three `.so` files next to the program.
+
+This hasn't been built yet. The rest of this document covers landing the fix
+upstream, which inkwell doesn't depend on.
 
 ## Test results
 

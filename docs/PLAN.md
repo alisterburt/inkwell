@@ -17,7 +17,7 @@ non-technical person can update from their phone.
 | Decision | Choice | Why |
 | --- | --- | --- |
 | Power | Battery, with the Pi fully off between updates | No visible cable, and the web server isn't always running |
-| Compute | Raspberry Pi Zero 2 W in the product, Pi 5 for early development | Keeps Mojo on the device and fits a thin frame |
+| Compute | Raspberry Pi Zero 2 W from the start, no Pi 5 | Develop on the hardware that ships, with Mojo on the device |
 | Button experience | Press, loading screen, then QR when the server is up | Slower to respond, accepted in exchange for battery power |
 | Panel | Waveshare 7.8", 1872×1404 | Matches the concept render and keeps the frame compact |
 
@@ -37,11 +37,13 @@ No hardware needed.
 
 ### M1: Panel bring-up
 
-- Buy the panel and a Pi 5. See [Hardware](HARDWARE.md).
+Requires the [Mojo ARMv8.0 runtime build](MOJO_ARM.md).
+
+- Buy the panel and a Zero 2 W. See [Hardware](HARDWARE.md).
 - Install Ubuntu Server 24.04.
 - Write the IT8951 driver in Mojo using `spidev` and GPIO.
 - Exit: a Mojo binary built off the device draws a test image on the panel in
-  16 greys, and the stock Mojo runtime is confirmed on real hardware.
+  16 greys, and the rebuilt Mojo runtime is confirmed on real hardware.
 
 ### M2: Photo loop on the home network
 
@@ -65,9 +67,7 @@ Developed on an always-powered Pi.
 
 ### M4: Battery and power control
 
-Requires the [Mojo ARMv8.0 runtime fix](MOJO_ARM.md).
-
-- Move to a Zero 2 W, power controller, battery, and boost stage.
+- Add a power controller, battery, and boost stage.
 - Timer wake: draw the next photo with no WiFi, then power off.
 - Button wake: run the session from M3, then power off.
 - Power off the IT8951 board along with the Pi.
@@ -91,10 +91,10 @@ Only needed if a frame will be given to someone else.
 - Hotspot setup mode for entering WiFi details from a phone.
 - Exit: someone can set up a frame without a computer.
 
-### Parallel track: Mojo on ARMv8.0
+### Prerequisite for M1: Mojo on ARMv8.0
 
-See [Mojo on ARMv8.0](MOJO_ARM.md). It doesn't block M0 to M3, which can run on a
-Pi 5, but M4 depends on it.
+Build the runtime libraries for the Zero 2 W. See [Mojo on ARMv8.0](MOJO_ARM.md).
+M0 doesn't depend on it.
 
 ## Open decisions
 

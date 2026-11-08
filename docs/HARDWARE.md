@@ -7,9 +7,9 @@ Prices checked 2026-11-08, before tax, shipping, and tariffs.
 | Part | Choice | Price | Notes |
 | --- | --- | --- | --- |
 | Panel and driver | Waveshare 7.8" e-Paper HAT | $143.99 (1-9 units) | Includes the IT8951 driver board |
-| Compute, development | Raspberry Pi 5, 1 GB | $45 | Runs stock Mojo in emulation; compile elsewhere; not used in the product |
-| Compute, product | Raspberry Pi Zero 2 W with header | $19.80 | Needs the [runtime fix](MOJO_ARM.md); out of stock at Adafruit when checked |
+| Compute | Raspberry Pi Zero 2 W with header | About $20-23 | Needs the [runtime build](MOJO_ARM.md); widely out of stock when checked |
 | Storage | microSD card | Not priced | |
+| Bench power | Micro-USB supply | Not priced | For development before the battery |
 | Power controller | Witty Pi 4 or similar | About $33 | Timer and button wake, 0.5 mA standby listed |
 | Battery | Flat LiPo, about 5,000 mAh | Not priced | Needs protection circuitry |
 | Boost stage | LiPo to 5 V | Not priced | The Witty Pi 4 takes 5 V or 6-30 V, not a single cell directly |
@@ -89,7 +89,7 @@ precisely. The wood should wait until the electronics stack has been measured.
 ### Stage 2: Custom internal carrier
 
 - 3D-printed or laser-cut carrier that holds the panel, boards, button, and
-  cable exit.
+  charging port. A makerspace or online print service avoids needing a printer.
 - Stiff backing board with no pressure on the glass or ribbon.
 - Purpose: get the internals right. The carrier can later move to a nicer frame
   unchanged.
