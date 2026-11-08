@@ -19,6 +19,7 @@ non-technical person can update from their phone.
 | Power | Battery, with the Pi fully off between updates | No visible cable, and the web server isn't always running |
 | Compute | Raspberry Pi Zero 2 W in the product, Pi 5 for early development | Keeps Mojo on the device and fits a thin frame |
 | Button experience | Press, loading screen, then QR when the server is up | Slower to respond, accepted in exchange for battery power |
+| Panel | Waveshare 7.8", 1872×1404 | Matches the concept render and keeps the frame compact |
 
 ## Milestones
 
@@ -99,12 +100,11 @@ Pi 5, but M4 depends on it.
 
 | # | Decision | Options | Leaning | Blocks |
 | --- | --- | --- | --- | --- |
-| 1 | Panel size | 7.8" or 10.3", both 1872×1404 | 7.8" for the prototype | M1 |
-| 2 | Access | Home network only, or remote too | Home only for the first version | M2 |
-| 3 | Photo dithering | None, or fine dither | Fine dither for photos, none for text | M2 |
-| 4 | Power controller | PiSugar family, Witty Pi 4 with separate charger and boost, or a custom board | Test a PiSugar first for simplicity; check standby draw and pack size | M4 |
-| 5 | Operating system | Ubuntu Server, or a minimal Buildroot image | Start on Ubuntu, move if boot time requires it | M4 |
-| 6 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M5 |
+| 1 | Access | Home network only, or remote too | Home only for the first version | M2 |
+| 2 | Photo dithering | None, or fine dither | Fine dither for photos, none for text | M2 |
+| 3 | Power controller | PiSugar family, Witty Pi 4 with separate charger and boost, or a custom board | Test a PiSugar first for simplicity; check standby draw and pack size | M4 |
+| 4 | Operating system | Ubuntu Server, or a minimal Buildroot image | Start on Ubuntu, move if boot time requires it | M4 |
+| 5 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M5 |
 
 ## Later
 
