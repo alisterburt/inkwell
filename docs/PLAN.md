@@ -71,7 +71,8 @@ Developed on an always-powered Pi.
 - Timer wake: draw the next photo with no WiFi, then power off.
 - Button wake: run the session from M3, then power off.
 - Power off the IT8951 board along with the Pi.
-- Reduce boot time, moving to a minimal OS if needed.
+- Draw the loading overlay as the first thing Linux runs, and reduce boot time,
+  moving to a minimal OS if needed.
 - Low-battery warning on the phone page.
 - Exit: measured press-to-QR time, with a target under 15 seconds. Measured
   energy per photo change and per session, and a battery-life estimate based on
@@ -104,7 +105,8 @@ M0 doesn't depend on it.
 | 2 | Photo dithering | None, or fine dither | Fine dither for photos, none for text | M2 |
 | 3 | Power controller | PiSugar family, Witty Pi 4 with separate charger and boost, or a custom board | Test a PiSugar first for simplicity; check standby draw and pack size | M4 |
 | 4 | Operating system | Ubuntu Server, or a minimal Buildroot image | Start on Ubuntu, move if boot time requires it | M4 |
-| 5 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M5 |
+| 5 | Press feedback | Early-boot overlay only, or a small microcontroller that draws it before Linux | Early-boot first; add the microcontroller if the measured gap feels dead | M4 |
+| 6 | Frame size and mat | 8×10" with wide mat, or a tighter frame | Decide after seeing the real panel | M5 |
 
 ## Later
 

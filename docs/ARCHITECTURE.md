@@ -35,10 +35,10 @@ during a session.
 
 **Button wake** (managing photos):
 
-1. Press. There's no visible response until Linux has booted far enough to start
-   the program.
-2. Program starts as early as possible and draws a "Waking up" overlay, before
-   WiFi.
+1. Press. Nothing can change on the panel until something is running to drive
+   it, so this gap should be as short as possible.
+2. The program runs as the first thing Linux starts, with SPI and GPIO built into
+   the kernel, and draws a "Waking up" overlay from a bitmap before anything else.
 3. WiFi connects, the server starts, and a token is generated.
 4. QR overlay replaces the loading overlay. It has to wait for this point anyway
    because it contains the address the frame was just given.
